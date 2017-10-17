@@ -29,6 +29,7 @@
 // @grant         GM_getValue
 // @grant         GM_setValue
 // @license       MIT
+// @noframes
 // ==/UserScript==
 
 
@@ -130,7 +131,6 @@ $(function() {
                         return ($2 in data) ? data[$2] : '';
                     })
                 }
-		    
                 var websiteHostName = location.protocol + "//" + location.host + "/";
 
                 var Girl = function(name){
@@ -148,9 +148,9 @@ $(function() {
 
                     var self = this;
 
-                    var list_template = '<li id="#{username}">'+
-                        '		<img src="http://ccstatic.highwebmedia.com/static/images/ico-01.png" class="remove" onclick="viewer.remove(\'#{username}\',this)">'+
-                        '		<a target="_blank" href="#{href}"><img src="http://ccstatic.highwebmedia.com/static/images/ico-cams.png" class="handle" title="#{username}"></a>'+
+                    var list_template = '<li class="close-new" id="#{username}">'+
+                        '		<img src="https://cdn3.iconfinder.com/data/icons/virtual-notebook/16/button_close-128.png" class="remove" onclick="viewer.remove(\'#{username}\',this)">'+
+                        '		<a target="_blank" href="#{href}"><img src="https://cdn1.iconfinder.com/data/icons/computer-hardware-4/512/webcam-512.png" class="handle" title="#{username}">#{username}</a>'+
                         '		<iframe src="#{src}"></iframe>'+
                         '	</li>';
 
@@ -185,6 +185,7 @@ $(function() {
                             '#camGirls li { margin: 0; padding:0; width:500px; overflow:hidden; display:inline-block; height:456px; }'+
                             '#camGirls iframe { margin: 0; padding:0; border:none; position:relative; width:1030px; height:528px; }'+
                             '#camGirls .remove { cursor:pointer; display:inline; top:2px; left:1px; position:relative; float:left; z-index:99; }'+
+			    '#camGirls .close-new img { width:15px; height:15px; }'+
                             '#camGirls .handle { cursor:pointer; display:inline; top:2px; left:2px; position:relative; float:left; z-index:99; }'+
                             '#camControls { border:1px solid #CCC; margin:2px; padding:3px; }'+
                             '#camControls .active { border:1px solid black; background:#fff; color:#dc5500; }'+
