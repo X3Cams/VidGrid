@@ -5,8 +5,8 @@
 // @description   Watch a selection of feeds on Chaturbate.com simultaneously within a single tab using VidGrid!
 // @namespace     VidGrid
 // @version       1.0.1
-// @updateURL     https://github.com/X3Cams/VidGrid/raw/master/VidGrid.user.js
-// @downloadURL   https://github.com/X3Cams/VidGrid/raw/master/VidGrid.user.js
+// @updateURL     https://github.com/X3Cams/VidGrid/blob/Developer/VidGrid.user.js
+// @downloadURL   https://github.com/X3Cams/VidGrid/blob/Developer/VidGrid.user.js
 // @supportURL    https://github.com/X3Cams/VidGrid/issues
 // @homepage      https://github.com/X3Cams
 // @match         https://chaturbate.com
@@ -150,7 +150,7 @@ $(function() {
 
                     var list_template = '<li class="close-new" id="#{username}">'+
                         '		<img src="https://cdn3.iconfinder.com/data/icons/virtual-notebook/16/button_close-128.png" class="remove" onclick="viewer.remove(\'#{username}\',this)">'+
-                        '		<a target="_blank" href="#{href}"><img src="https://cdn1.iconfinder.com/data/icons/computer-hardware-4/512/webcam-512.png" class="handle" title="#{username}">#{username}</a>'+
+                        '		<a target="_blank" href="#{href}"><img src="https://cdn1.iconfinder.com/data/icons/computer-hardware-4/512/webcam-512.png" class="handle" title="\'#{username}\'">#{username}</a>'+
                         '		<iframe src="#{src}"></iframe>'+
                         '	</li>';
 
