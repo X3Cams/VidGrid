@@ -5,8 +5,8 @@
 // @description   Watch a selection of feeds on Chaturbate.com simultaneously within a single tab using VidGrid!
 // @namespace     VidGrid
 // @version       1.0.1
-// @updateURL     https://github.com/X3Cams/VidGrid/raw/master/VidGrid.user.js
-// @downloadURL   https://github.com/X3Cams/VidGrid/raw/master/VidGrid.user.js
+// @updateURL     https://github.com/angelxaces/VidGrid/blob/master/VidGrid.user.js
+// @downloadURL   https://github.com/angelxaces/VidGrid/blob/master/VidGrid.user.js
 // @supportURL    https://github.com/X3Cams/VidGrid/issues
 // @homepage      https://github.com/X3Cams
 // @match         https://chaturbate.com/*
