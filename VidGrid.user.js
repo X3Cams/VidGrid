@@ -9,19 +9,19 @@
 // @downloadURL   https://github.com/X3Cams/VidGrid/raw/master/VidGrid.user.js
 // @supportURL    https://github.com/X3Cams/VidGrid/issues
 // @homepage      https://github.com/X3Cams
-// @match         https://chaturbate.com
+// @match         https://chaturbate.com/*
 // @match         http://chaturbate.com
 // @match         http*://*chaturbate.com/*
 // @match         http*://*chaturbate.com/*?*
+// @match         http*://*chaturbate.com/tag/*
 // @match         http*://*chaturbate.com/tags/*
-// @match         http*://*chaturbate.com/tags/*/*
 // @match         http*://*chaturbate.com/*?page=*
+// @include       *chaturbate.com*
 // @include       http*://*.chaturbate.com/*/*
 // @include       http*://*.chaturbate.com/*?*
-// @include       http*://*.chaturbate.com/*#*
 // @include       http*://*.chaturbate.com/*&*
 // @exclude       http://serve.ads.chaturbate.com/*
-// @require       https://code.jquery.com/jquery-2.1.4.min.js
+// @require       https://code.jquery.com/jquery-2.1.4.min.js#sha256-8WqyJLuWKRBVhxXIL1jBDD7SDxU936oZkCnxQbWwJVw=
 // @icon          https://www.spreadshirt.com/image-server/v1/designs/11624206,width=178,height=178/stripper-pole-dancer-silhouette-darr.png
 // @grant         unsafeWindow
 // @grant         GM_registerMenuCommand
@@ -29,8 +29,15 @@
 // @grant         GM_getValue
 // @grant         GM_setValue
 // @license       MIT
+// @noframes
 // ==/UserScript==
 
+// Taking care of the Adult Content, "bouncer." --Thanks to the Authors(s) of the
+// "Chatterbate Enhanced" script.
+document.cookie = 'noads=1; expires=' + now.toUTCString() + '; path=/';
+document.cookie = 'agreeterms=1; expires=' + later.toUTCString() + '; path=/';
+document.cookie = 'np3=1; expires=' + later.toUTCString() + '; path=/';
+// Copied from -> https://openuserjs.org/scripts/stixmaster/Chaturbate_Enhanced 
 
 $(function() {
     if (window.top != window.self)
@@ -130,7 +137,6 @@ $(function() {
                         return ($2 in data) ? data[$2] : '';
                     })
                 }
-		    
                 var websiteHostName = location.protocol + "//" + location.host + "/";
 
                 var Girl = function(name){
@@ -214,7 +220,7 @@ $(function() {
                             }
                         });
 
-                        var li = $("<li>").html("<a href='javascript:viewer.show();'>VidGrid</a>");
+                        var li = $("<li class='gender-tab' style='display:inline-block; position:absolute;'>").html("<a href='javascript:viewer.show();'>VidGrid</a>");
 
                         $(".sub-nav").append(li);
                     }
@@ -254,6 +260,7 @@ $(function() {
                         self.girls.push(new Girl(username));
                         $(obj).html("Girl added to VidGrid");
                         self.loaded = false;
+					    viewer.save();
                     }
 
                     this.remove = function(username,elem){
@@ -271,7 +278,7 @@ $(function() {
                             var username = $(this).parents("li")[0].id;
                             //need to find a window variable that'll indicate when the flash object is there and it's offline
                             if ($(this.contentWindow.document).find('#movie').length == 0)
-                                self.remove(username);
+                                 self.remove(username);
                         });
                     }
 
@@ -308,7 +315,7 @@ $(function() {
                     this.save = function(){
                         gm.set_girls();
                         gm.set_layout();
-                        alert("Saved");
+                        //alert("Saved");
                     }
 
                     this.layout = function(id){
