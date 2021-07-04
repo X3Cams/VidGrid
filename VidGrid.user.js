@@ -34,6 +34,12 @@
 
 // Taking care of the Adult Content, "bouncer." --Thanks to the Authors(s) of the
 // "Chatterbate Enhanced" script.
+var later = new Date();
+var laterDate = later.setUTCFullYear('2099');
+var now = new Date();
+var time = now.getTime();
+time += 21600000;
+now.setTime(time);
 document.cookie = 'noads=1; expires=' + now.toUTCString() + '; path=/';
 document.cookie = 'agreeterms=1; expires=' + later.toUTCString() + '; path=/';
 document.cookie = 'np3=1; expires=' + later.toUTCString() + '; path=/';
