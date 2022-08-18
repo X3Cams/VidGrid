@@ -37,7 +37,8 @@
 // @grant        GM_getResourceText
 // @grant        GM_addStyle
 // @license        MIT
-// @nofram       // ==/UserScript==
+// @noframes       
+// ==/UserScript==
 /* eslint-env   greasemonkey */
 GM_addStyle (GM_getResourceText("jqueryui"));
 
