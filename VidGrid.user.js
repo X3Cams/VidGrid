@@ -355,7 +355,7 @@ $(function() {
 							}
 							$("#camControls input").removeClass('active')
 							$("#layout_" + id).addClass('active')
-							$("#camGirls li, div#videoPlayerDiv img").width(columWidth);
+							$("#camGirls li, div#videoPlayerDiv img").width(columnWidth);
 							$("#camGirls li, div#videoPlayerDiv img").height(columnHeight);
 							$("#camGirls object").css({ top: top+"px" });
 						}
