@@ -1,379 +1,333 @@
-// ==UserScript==
-// @name        VidGrid
-// @run-at       document-start
-// @author        Mr. Jangles
-// @description        Watch a selection of feeds on Chaturbate.com simultaneously within a single tab using VidGrid!
-// @namespace        https://github.com/angelxaces/VidGrid/
-// @version        1.0.1
-// @updateURL        https://github.com/X3Cams/VidGrid/raw/master/VidGrid.user.js
-// @downloadURL        https://github.com/X3Cams/VidGrid/raw/master/VidGrid.user.js
-// @supportURL        https://github.com/X3Cams/VidGrid/issues
-// @homepage        https://github.com/X3Cams
-// @match        http*://chaturbate.com
-// @match        http*://*chaturbate.com/*
-// @match        http*://*chaturbate.com/*?*
-// @match        http*://*chaturbate.com/tags/*
-// @match        http*://*chaturbate.com/tags/*/*
-// @match        http*://*chaturbate.com/*?page=*
-// @match        http*://*chaturbate.com/*/*/?page=*
-// @match        http*://*.chaturbate.com/*/*
-// @match        http*://*.chaturbate.com/*?*
-// @match        http*://*.chaturbate.com/*#*
-// @match        http*://*.chaturbate.com/*&*
-// @exclude        http*://a2z.com/
-// @require        https://gist.githubusercontent.com/angelxaces/0c51c574014c2cd9b85bf6ce8d881c20/raw/64edafb61d2bd2966d3fea585e033fde3977e270/vidgridIncludes.js
-// @resource        jqueryui https://gist.githubusercontent.com/angelxaces/0c51c574014c2cd9b85bf6ce8d881c20/raw/ca94e378ed7d0f20cb2128a0d9175b6251079366/jqueryui.css
-// @icon        https://www.spreadshirt.com/image-server/v1/designs/11624206,width=178,height=178/stripper-pole-dancer-silhouette-darr.png
+﻿// ==UserScript==
+// @name      VidGrid Development OOP
+// @run-at     document-start
+// @description      Watch a selection of feeds on Chaturbate.com simultaneously within a single tab using VidGrid!
+// @author          Mr. Jangles
+// @match               http*://*.chaturbate.com/*&*
+// @match            http*://chaturbate.com
+// @match           http*://*chaturbate.com/*
+// @match           http*://*chaturbate.com/*?*
+// @match          http*://*chaturbate.com/tags/*
+// @match       http*://*chaturbate.com/tags/*/*
+// @match  http*://*chaturbate.com/*?page=*
+// @match  http*://*chaturbate.com/*/*/#vidgrid
+// @match  http*://*chaturbate.com/*/*/?page=*
+// @match  http*://*.chaturbate.com/*/*
+// @match  http*://*.chaturbate.com/*?*
+// @match  http*://*.chaturbate.com/*#*
+// @version           1.0.1
+// @exclude  http*://a2z.com/
 // @connect        *
-// @connect        jquery.com
-// @connect        github.com
-// @connect        self
-// @connect        chaturbate.com
-// @connect        highwebmedia.com
-// @connect        cloudflare.com
+// @resource jqueryImg https://github.com/angelxaces/VidGrid/blob/master/ui-bg_glass_60_eeeeee_1x400%5B1%5D.png
+// @connect cdnjs.cloudflare.com
+// @connect gihub.com
+// @connect githubusercontent.com
+// @connect self
 // @grant        unsafeWindow
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_getResourceText
 // @grant        GM_addStyle
+// @grant        GM.xmlHttpRequest
+// @grant        GM_xmlhttpRequest
+// @grant        GM_addElement
+// @grant        GM_log
+// @grant        GM_openInTab
+// @grant window.close
+// @grant window.focus
+// @grant window.onurlchange
+// @grant        GM_info
+// @grant GM_notification
 // @license        MIT
-// @nofram       // ==/UserScript==
-/* eslint-env   greasemonkey */
-GM_addStyle (GM_getResourceText("jqueryui"));
+// @noframes
+// @exclude    https://bam.nr-data.net
+// @grant        GM.getResourceText
+// @require https://gist.githubusercontent.com/angelxaces/54c0ad2092c2fc55746baae7834817c5/raw/1b47754c9759e87723c3480aa650ab58266bb4d0/videojs-8.3.0.js
+// @require https://gist.githubusercontent.com/angelxaces/638f31009079f89cf4307e05487a5dc8/raw/e87ad813f21a33e78043540cf8d30066beafb461/vidgridLibraries.js
+// @require https://cdn.jsdelivr.net/npm/intersection-observer@0.12.2/intersection-observer.js
+// @resource jqueryui https://gist.githubusercontent.com/angelxaces/0d654827b4c5eacb3bedef4d0a122713/raw/136da74c14373c541d89bbb91634b5640a295afa/vidgridstyles.css
+// @icon        https://www.spreadshirt.com/image-server/v1/designs/11624206,width=178,height=178/stripper-pole-dancer-silhouette-darr.png
+// ==/UserScript==
 
-/* eslint-env  jquery, greasemonkey */
+/* eslint-env jquery, es6 */
+"use strict";
+let jqueryUiStyles = GM_getResourceText("jqueryui");
+GM_addStyle(jqueryUiStyles);
+GM_addStyle("ul#grid {width:100%; } ul#grid li {display:grid; height: 242px; width:400px;} #vg {height: 760px; width: 100%} .green, .rlr-selected { background-color: rgb(0, 255, 0) !important;}");
+GM_addStyle(".ui-state-default,.ui-widget-content .ui-state-default,.ui-widget-header .ui-state-default,.ui-button,html .ui-button.ui-state-disabled:hover,html .ui-button.ui-state-disabled:active{border:1px solid #ccc;background:#eee url(\""+GM_getResourceText("jqueryImg")+"\") 50% 50% repeat-x;font-weight:bold;color:#3383bb}");
+
+
 $(function() {
-	if (window.top != window.self){
-		return;
-	}
-	var gm = function(){
-		
-		var self = this;
-		
-		this.STORAGE_KEY_NAME = "chaturbate_girls";
-		this.LAYOUT_KEY_NAME = "chaturbate_layout";
-		
-		this.get_layout = function(){
-			setTimeout(function(){
-				var temp = 2;
-				var layout_id = GM_getValue(self.LAYOUT_KEY_NAME);
-				if (typeof layout_id == "undefined"){
-					layout_id = temp;
-				}
-				
-				var adder = function(lid){
-					viewer.layout_id = lid;
-					viewer.layout(lid);
-				}
-				var script = document.createElement("script");
-				script.textContent = "(" + adder.toString() + ")("+layout_id+");";
-				//document.body.appendChild(script);
-			},0);
-		}
-		
-		this.get_girls = function(){
-			setTimeout(function(){
-				var temp = '[]';
-				var sJSON = GM_getValue(self.STORAGE_KEY_NAME);
-				if (typeof sJSON == "undefined"){
-					sJSON = temp;
-				}
-				var adder = function(savedGirls){
-					$.each(savedGirls,function(){
-						viewer.girls.push(new Girl(this));
-					});
-					if ( location.hash == "#live" ){
-						viewer.show();
-					}
-				}
-				var script = document.createElement("script");
-				script.textContent = "(" + adder.toString() + ")("+sJSON+");";
-				document.body.appendChild(script);
-				
-			},0);
-		}
-		
-		this.set_girls = function(){
-			setTimeout(function(){
-				var data = JSON.stringify(unsafeWindow.jQuery.map(unsafeWindow.viewer.girls,function(o){ return o.username }));
-				GM_setValue(self.STORAGE_KEY_NAME, data);
-			},0);
-		}
-		
-		this.set_layout = function(){
-			setTimeout(function(){
-				GM_setValue(self.LAYOUT_KEY_NAME, unsafeWindow.viewer.layout_id);
-			},0);
-		}
-		return self;
-	};
-	
-	if (cloneInto){
-		var insideGM = new gm();
-		var outsideGM = createObjectIn(unsafeWindow, {defineAs: "gm"});
-		Object.keys(insideGM).forEach(function(key){
-			try {
-				if (typeof insideGM[key] == 'function'){
-					exportFunction(insideGM[key], outsideGM, {defineAs: key});
-				}
-			} catch(e){
-				
-			}
-		});
-	}
-	else {
-		unsafeWindow.gm = new gm;
-	}
-	
-	function main() {
-		if (typeof jQuery != "undefined"){
-			jQuery(document).ready(function(){
-				function getKey(e) {
-					if(window.event) { // IE
-						return e.keyCode;
-					} else if(e.which) { // Netscape/Firefox/Opera
-						return e.which
-					}
-				}
-				
-				var exports = "getKey,toHtml,websiteHostName,Girl,viewer";
-				
-				var toHtml = function(data, template){
-					return template.replace(/#(?:\{|%7B)(.*?)(?:\}|%7D)/g, function($1, $2){
-						return ($2 in data) ? data[$2] : '';
-					})
-				}
-				
-				var websiteHostName = location.protocol + "//" + location.host + "/";
-				
-				var Girl = function(name){
-					var user = name.replace(/\//g,"");
-						var self = this;
-						this.href = websiteHostName + user;
-						this.username = user;
-						this.src = websiteHostName + "embed/" + self.username + "/?join_overlay=1&room=" + self.username;
-					}
-					
-					
-					
-					
-					
-					var viewer = new (function(){
-						
-						var self = this;
-						
-						var list_template = '<li id="#{username}" class="ui-state-default">'+
-						'		<a target="_self" class="remove" href="javascript:void(0);viewer.remove(\'#{username}\',this)"><img src="https://static-assets.highwebmedia.com/tsdefaultassets/floating-player-close.svg" onclick="viewer.remove(\'#{username}\',this)" title="Close">Close</a>'+
-						'		<a target="_blank" href="#{href}"><img src="https://static-assets.highwebmedia.com/images/cam.svg" class="handle" title="#{username}">#{username}\'s room</a>'+
-						'		<object id="#{username}_video" width="745px" height="480px" data="#{src}" type="text/html"></object></li>';
-						
-						if(this.layout_id === 'undefined'){this.layout_id = 3};
-						this.girls = [];
-						this.all_girls = [];
-						this.loaded = false;
-						
-						
-						this.init = function(){
-							
-							$('.content').prepend("<div style='width:1500px; margin:3px 32px; padding:3px; border:1px solid #CCC;'> Use the <img src='https://static-assets.highwebmedia.com/images/cam.svg' align='absmiddle'> icon to add girls to the 'VidGrid' tab </div>");
-							
-							var template = '<div id="camGirls" style="visibility:hidden;">'+
-							'<div id="camControls">'+
-							'Username: <input type="text" name="camGirlUsername" id="camGirlUsername" onkeyup="if (getKey(event) == 13) viewer.add()" >'+
-							'<input type="Button" value="Add" onclick="viewer.add()">'+
-							'<input type="Button" value="Add Top 12" onclick="viewer.addTop12()">'+
-							'<input type="Button" value="Remove All" onclick="viewer.removeAll()">'+
-							'<input type="Button" value="Remove Offlines" onclick="viewer.clearEmptyCams()">'+
-							'<input type="Button" value="Save" onclick="viewer.save()">'+
-							'[ Layout: '+
-							'<input type="Button" value="Semi-Compact" onclick="viewer.layout(1)" id="layout_1">'+
-							'<input type="Button" value="Compact" onclick="viewer.layout(2)" id="layout_2">'+
-							'<input type="Button" value="Full" onclick="viewer.layout(3)" id="layout_3">]'+
-							'</div>'+
-							'<ul id="girls_list"></ul>'+
-							'</div>';
-							$("#main .content").after(template);
-							
-							var css = '<style type="text/css">' +
-							'#camGirls ul { margin: 0; padding:0; display:inline-block;}'+
-							'#camGirls li { margin: 0; padding:0; width:500px; overflow:hidden; display:inline-block; height:456px; }'+
-							'#camGirls object { margin: 0; padding:0; border:none; position:relative; width:1030px; height:528px; }'+
-							'#camGirls .remove { cursor:pointer; display:inline; top:2px; left:1px; position:relative; float:left; z-index:99; }'+
-							'#camGirls .handle { cursor:pointer; display:inline; top:2px; left:2px; position:relative; float:left; z-index:99; }'+
-							'#camControls { border:1px solid #CCC; margin:2px; padding:3px; }'+
-							'#camControls .active { border:1px solid black; background:#fff; color:#dc5500; }'+
-							'#girls_list { list-style-type: none; margin: 0; padding: 0; }' +
-							'#girls_list li { margin: 3px 3px 3px 0; padding: 1px; float: left; }'+
-							'</style>';
-							$('body').append(css);
-							
-							self.getSaved();
-							self.fixRefresh();
-							self.updateLayout();
-							
-							$(".sub-nav li").click(function(){
-								var page = location.href;
-								if (page.indexOf('#') >- 1)
-								page = location.href.split("#")[0];
-								var target = location.origin + $(this).find('a').attr('href');
-								if (page != target){
-									return true;
-								}
-								else {
-									$("#main .content").show();
-									$("#main #camGirls").css({"visibility":"hidden","height":"0px"});
-									$(".sub-nav li").removeClass("active");
-									$(this).addClass("active");
-									location.hash = "#tab"
-									return false;
-								}
-							});
-							$("ul.sub-nav").append("<li class='gender-tab' ts='$g' style='display: inline-block; position: relative; font: 13.0029px / 16px UbuntuMedium, Arial, Helvetica, sans-serif;'><a href='javascript:viewer.show();'>VidGrid</a></li>");
-							$("#followed_tab").css({"position":"relative"});
-						}
-						this.fixRefresh = function(){
-							jQuery( "li.cams" ).live("click", function() {
-								viewer.add_girl($(this).parents('li').find('a').attr('href'),this);
-							}).css("cursor","pointer").attr("title","Add girl to VidGrid");
-							//TODO: conditional for rooms that have already been added so that refresh doesn't reset the link, allowing dupilicates. duplicates aren't terrible as they only load one player, but it's sloppy and it's annoying me.
-							//TODO: toggle to add/remove from list
-						}
-						this.show = function(){
-							$(".sub-nav li").removeClass("active");
-							$(".sub-nav li:last").addClass("active");
-							$("#main .content").hide();
-							$("#main #camGirls").css({"visibility":"","height":"auto"});
-							location.hash = "#live"
-							if (self.loaded == false){
-								self.loaded = true;
-								self.updateLayout();
-							}
-						}
-						this.addTop12 = function(){
-							$(".list > li:lt(12)").each(function(){
-								self.add_girl($(this).find('a').attr('href'));
-							});
-							self.updateLayout();
-						}
-						this.add = function(){
-							viewer.girls.push(new Girl($('#camGirlUsername').val()));
-							$("#camGirlUsername").val("");
-							self.updateLayout()
-						}
-						this.add_girl = function(username,obj){
-							self.girls.push(new Girl(username));
-							$(obj).html("Girl added to VidGrid");
-							self.loaded = false;
-							viewer.save();
-						}
-						this.remove = function(username,elem){
-							$.each(self.girls, function(i,o){
-								if (typeof o != "undefined" && o.username.toLowerCase().indexOf(username.toLowerCase()) >-1 ){
-									self.girls.splice(i,1);
-									$(elem).parent().remove();
-								}
-							});
-							self.updateLayout();
-						}
-						this.clearEmptyCams = function(){
-							$.ajax({
-								url: "https://chaturbate.com/api/public/affiliates/onlinerooms?wm=KZ7tX&client_ip=request_ip&limit=500",
-								success: function(result){
-									console.log(this.xhrAPI);
-									$(viewer.girls).each(function( i, v ) {
-										for(n=0;n<result.results.length;n++){
-											if(v.username == result.results[n].username){
-												if(result.results[n].current_show != 'public'){
-													viewer.remove(v.username);
-												}
-												break;
-											}else if(n == result.results.length-1 && v.username != result.results[n].username){
-												viewer.remove(v.username);
-											}
-										}
-									});
-								}, //success
-								error: function(){
-									return false;
-								}
-							});
-						}
-						this.removeAll = function(){
-							self.girls = [];
-							self.updateLayout();
-						}
-						this.updateLayout = function (){
-							if ($("#camGirls:visible").length > 0) {
-								$.each(self.girls, function(){
-									if ($("li#"+this.username).length == 0){
-										$("#girls_list").append(toHtml(this,list_template));
-									}
-								});
-								$("#girls_list li").each(function(){
-									var user = this.id;
-									var isIncluded = $.map(viewer.girls,function(o,i){
-										if (o.username == user){
-											return true;
-										}
-									}).length > 0;
-									if (isIncluded == false){
-										$(this).remove();
-									}
-								});
-								self.layout(self.layout_id);
-							}
-						}
-						this.getSaved = function(){
-							gm.get_layout();
-							gm.get_girls();
-						}
-						this.save = function(){
-							gm.set_girls();
-							gm.set_layout();
-							//alert("Saved");
-						}
-						this.layout = function(id){
-							var columns; var columnWidth; var columnHeight; var minWidth; var top;
-							self.layout_id = id;
-							if (id == 1){
-								columnWidth = 500;
-								columnHeight = 470;
-								top = 0;
-							}
-							else if (id == 2){
-								minWidth = 400;
-								columns = Math.floor($(window).width() / minWidth);
-								columnWidth = Math.floor($(window).width() / columns) - 5;
-								columnHeight = 375;
-								top = -66;
-							}
-							else if (id == 3){
-								columnWidth = 730;
-								columnHeight = 465;
-								top = 0;
-							}
-							$("#camControls input").removeClass('active')
-							$("#layout_" + id).addClass('active')
-							$("#camGirls li, div#videoPlayerDiv img").width(columWidth);
-							$("#camGirls li, div#videoPlayerDiv img").height(columnHeight);
-							$("#camGirls object").css({ top: top+"px" });
-						}
-					}); //viewer
-					$.each(exports.split(","),function(i,o){
-						window[o] = eval(o);
-					});
-					window.viewer.init();
-				});
-			}
-			
-		} //main
-		
-		var script = document.createElement("script");
-		script.textContent = "(" + main.toString() + ")();";
-		document.body.appendChild(script);
-		$('ul#girls_list').sortable();
-		//$('#girls_list').disableSelection();
-		
-	});
-	// Script was originally created by Teso Mayn https://github.com/Teso-Limited/Chaturbate-MultiCam
-	// Modifications are made by Mr. Jangles https://github.com/X3Cams/VidGrid
+    // Constants
+    const vidgrid = {
+        rooms: GM_getValue("rooms", Array()),
+        stream: GM_getValue("stream", Array()),
+        description: GM_getValue("description", Array())
+    };
+
+    //$('li.room_list_room a:first-child').on('click', function() { GM_openin_tab(location.origin + this.attr('href'), setParent, loadInBackground); return false; });
+    // Variables
+    var template = "<div id=\"vg\"><div id=\"camControls\">"+
+        "Username: <input type=\"text\" name=\"camGirlUsername\" id=\"camGirlUsername\" >"+
+        "<input type=\"Button\" value=\"Add\" onclick=\"\">"+
+        "<input type=\"Button\" value=\"Add Top 12\" onclick=\"\">"+
+        "<input type=\"Button\" value=\"Remove All\" onclick=\"\">"+
+        "<input type=\"Button\" value=\"Remove Offlines\" onclick=\"\">"+
+        "<input type=\"Button\" value=\"Save\" onclick=\"\">"+
+        "[ Layout: "+
+        "<input type=\"Button\" value=\"Semi-Compact\" onclick=\"\" id=\"layout_1\">"+
+        "<input type=\"Button\" value=\"Compact\" onclick=\"\" id=\"layout_2\">"+
+        "<input type=\"Button\" value=\"Full\" onclick=\"\" id=\"layout_3\">]"+
+        "</div><ul id=\"grid\"></ul></div>";
+
+    // Removes that "Knox-like" age-verification wall.
+    $('.entrance_terms_overlay').remove();
+    document.cookie = "agreeterms=1";
+    // UI elements and modifications via jQuery
+    $("#main.content").after(template);
+    $("ul.sub-nav").append("<li id='vidgrid_tab' class='gender-tab'><a target='_self'>VidGrid</a></li>");
+    // Button Insert: Show/Hide Favorites
+    $("div.top-section").append("<input type='button' id= 'followed' value='Hide Favorites'>");
+    $( "#followed" ).on("click", function() {
+        $("div.icon_following").parent().toggle();
+    });
+    // Add functionality "VidGrid,"tab to top navigation
+    $("#vidgrid_tab").on("click", function() {
+        location.hash = "#vidgrid";
+        vidgrid.init();
+        // Boolean($(location.hash === "#vidgrid")) ? vidgrid.destroy() : vidgrid.init();
+    });
+    $("#grid").sortable({placeholder: "ui-state-highlight"}).disableSelection();
+    // Add closing "X" icon before VideoJS DIV
+    $("#grid li div").before( "<img class=\"close\" title=\"close\" alt=\"close\"  src=\"https://static-assets.highwebmedia.com/tsdefaultassets/floating-player-close.svg\">");
+    // close video button
+    $(".close").on("click", function() { this.parent.remove(); });
+
+    //hides  trans  rooms
+    $(".genders").offsetParent().remove();
+    // hides male rooms
+    $(".genderm").offsetParent().remove();
+    $("div.ad").remove();
+    // $('.room_thumbnail').replaceWith(function() { return '<div style="background-color: #0000FF; width:200px; height: 112px;"></div>';});
+
+    vidgrid.closeVideo = function(element) {
+        document.getElementById(element+"_li").remove();
+        //console.log(element);
+        let selected = $.inArray(element, vidgrid.rooms);
+        vidgrid.rooms.splice(selected, 1);
+        GM_setValue("rooms", vidgrid.rooms);
+        videojs(element).dispose();
+    };
+
+    // Highlights selected rooms when page loads
+    // While I could simply truncate selected rooms
+    // this provides an opportunity to deselect rooms
+    $("body").ready(function () {
+        let x; //The declaration of x... in the scope of this function!
+        for(x of $("a.no_select")) { //iterate through all of the anchors of class 'no_select.'
+            if(vidgrid.rooms.includes(x.dataset.room) === true){ //if the anchor of the no_select class's room in the dataset has a matching value to what's stored in vidgrid...
+                $(x).parent().addClass("rlr-selected"); //We make their thumbnail's background green ASAFP so the user knows it's been selected and another click will deselect the List-Item.
+            }
+        }
+        $(".roomCard>*:not(div.follow_star)").on("click", function() {
+            let el = this.offsetParent; //store the List-Item for a moment
+            let name = this.offsetParent.querySelector("a.no_select").dataset.room; //grab the username from the anchor
+            let rmId = $.inArray(name, vidgrid.rooms); //check whether the username is listed in the array in the rooms property
+            function addRoster (user, item){ //Add the room to your vidgrid list
+                vidgrid.extLibs(user, 2); // Run the xmlHTTPRequest.
+                item.classList.add("rlr-selected"); //make the thumbnail background green
+            }
+            function dropRoster(id, item) { //Remove the user from your list.
+                vidgrid.killUser(id); //If you've created your own snuff, you took this a little too literally.
+                item.classList.remove("rlr-selected"); //make the thumbnail background default color.
+            }
+            vidgrid.rooms.includes(name) ? dropRoster(rmId, el) : addRoster(name, el); //Does vidgrid.rooms listing have the name in it that was clicked? if so, remove them; if not, add them!
+        }).not("div.follow_star"); // Allows users follow a room without simultaneously (de)selecting it.
+    });
+
+    // I know there are easier ways of doing this but CRS is being a little cry-baby bitch and this works.
+    vidgrid.extLibs = function(url,type) {
+        var httpx = new XMLHttpRequest();
+        httpx.onload = function () {
+            if(httpx.status !== 200) {
+                console.log("Well... shit");
+                console.log("extLibs failed to load data because: " + httpx.status + resLoc);
+                return;
+            }
+            let output;
+            switch(type) {
+                default: {
+                    output = httpx.responseText;
+                    alert(Text(output));
+                    break;
+                }
+                case 0: {
+                    let script = document.createElement("script");
+                    script.textContent = httpx.response;
+                    output = document.head.appendChild(script);
+                    break;
+                }
+                case 1: {
+                    let y = GM_addStyle(httpx.responseText);
+                    output = $("body").append(y);
+                    break;
+                }
+                case 2: {
+                    let strm = JSON.parse(httpx.responseText).hls_source.substring(0, JSON.parse(httpx.responseText).hls_source.indexOf("?"));
+                    let usr = JSON.parse(httpx.responseText).broadcaster_username;
+                    //let rd = {stream: strm, description: JSON.parse(httpx.responseText).room_title, get video() { return vidgrid.module(this.model, this.stream)}};
+                    let description = JSON.parse(httpx.responseText).room_title;
+                    vidgrid.rooms.push(usr);
+                    vidgrid.stream.push(strm);
+                    vidgrid.description.push(description);
+                    GM_setValue("rooms", vidgrid.rooms);
+                    GM_setValue("stream", vidgrid.stream);
+                    GM_setValue("description", vidgrid.description);
+                    httpx.payLoad = GM_getValue("rooms");
+
+                    output = httpx;
+                    // console.table(httpx.payload);
+                }
+                    return output;
+            }
+        };
+        let resLoc = (type === 2) ? location.origin + "/api/chatvideocontext/" + url : url;
+        httpx.open("GET", resLoc);
+        httpx.send();
+        return httpx;
+    };
+    // TODO: cleanup
+
+    // Remove location.hash without refreshing if the native page action doesn't require it.
+    vidgrid.removeHash = function() {
+        var uri = window.location.toString();
+        if (uri.indexOf("#") > 0) {
+            var clean_uri = uri.substring(0, uri.indexOf("#"));
+            window.history.replaceState({}, document.title, clean_uri);
+        }
+    };
+    vidgrid.destroy = function() {
+        $("#vg").remove();
+        $("#main .content").show();
+        vidgrid.removeHash();
+    };
+
+    vidgrid.save = function() {
+        GM_setValue("rooms", vidgrid.rooms);
+        return GM_notification({
+            text: "Your model selection has been saved to VidGrid!",
+            title: "Saved",
+            silent: true,
+            timeout: 5000,
+            highlight: true,
+            onclick: () => alert("I was clicked!")
+        });
+    };
+
+
+    vidgrid.killMod = function(user) {
+        vidgrid.killUser(vidgrid.rooms.indexOf(user));
+        $("li#li_x_"+user).remove();
+        videojs(user).dispose();
+    };
+    // Removes broadcasters from VidGrid.
+    vidgrid.killUser = function(id) {
+        vidgrid.rooms.splice(id, 1);
+        vidgrid.stream.splice(id,1);
+        vidgrid.description.splice(id, 1);
+        GM_setValue("rooms", vidgrid.rooms);
+        GM_setValue("stream", vidgrid.stream);
+        GM_setValue("description", vidgrid.description);
+    };
+
+
+
+    vidgrid.vBox = function(x) {
+        let container = document.createElement("li");
+        container.setAttribute("class", "ui-state-default");
+        container.setAttribute("id", "li_"+vidgrid.rooms[x]);
+        $("#grid").append(container);
+    };
+
+
+    $('video').on('error', function () { this.remove(); });
+    vidgrid.init = function() {
+
+        $(".sub-nav li").removeClass("active");
+        $(".sub-nav li:last").addClass("active");
+        $("#main").append('<div id="vidgrid"><ul id="grid"></ul></div>');
+        $("#main .content").hide();
+        $("#followed").hide();
+        location.hash = "#vidgrid";
+        vidgrid.rooms.forEach((el) => {
+            $("#grid").append(vidgrid.vBox(vidgrid.rooms.indexOf(el)));
+        });
+
+        // Starting IntersectionObserver to make videos (un)load as they scroll in/out of view
+        const targets = document.querySelectorAll("#grid li");
+
+        const observerOptions = {
+            root: null,
+            threshold: 0.8
+            // threshold: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+        };
+        const observerCallback = (entries) => {
+
+            entries.forEach((entry) => {
+                //console.log(entry.target.id);
+                let name = 'x'+entry.target.id.slice(3);
+                let streamUrl = vidgrid.stream[vidgrid.rooms.indexOf(name.slice(1))];
+                let entryEl = document.getElementById(entry.target.id);
+                let entryElVid = $(entryEl).append(Object.assign(document.createElement('video'), {id: "x" + entry.target.id.slice(3), classList: "video-js loadin"}));
+
+                if (entry.isIntersecting) {
+                    $(entryElVid).ready(function() {
+                        try {
+                            videojs(name, {sources: [{type: "application/x-mpegURL", src: streamUrl}], liveui: true, autoplay:true, muted: true, controls: true});
+                            videojs(name).on('error', () => {
+                                //  vidgrid.killUser(vidgrid.rooms.indexOf(name.slice(3)));
+                                videojs(name).dispose();
+                            });
+                        } catch (error) {
+                            vidgrid.killUser(vidgrid.rooms.indexOf(name.slice(3)));
+                        }
+
+                        entry.target.setAttribute('class', "loaded");
+
+
+                        videojs(name).play();
+                    });
+                } else {
+                    //console.log(entry.target);
+                    entry.target.classList.remove("loaded");
+                    videojs(name).dispose();
+                }
+            });
+        };
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+        targets.forEach((target) => observer.observe(target));
+
+    };
+
+    if(location.hash === "#vidgrid") {
+        vidgrid.init();
+    }
+    unsafeWindow.vidgrid = vidgrid;
+    unsafeWindow.videojs = videojs;
+    //  unsafeWindow.xPlayer = xPlayer;
+    unsafeWindow.$ = $;
+    unsafeWindow.io = vidgrid.io;
+    unsafeWindow.IntersectionObserver = window.IntersectionObserver;
+    unsafeWindow.IntersectionObserverEntry = window.IntersectionObserverEntry;
+    unsafeWindow.IntersectionObserver = document.IntersectionObserver;
+    unsafeWindow.IntersectionObserverEntry = document.IntersectionObserverEntry;
+    unsafeWindow.IntersectionObserverRatio = document.IntersectionObserverRatio;
+    unsafeWindow.observer = document.observer;
+    unsafeWindow.observer = window.observer;
+
+
+});
+
+
+// Script was originally created by Teso Mayn https://github.com/Teso-Limited/Chaturbate-MultiCam
+// Modifications are made by Mr. Jangles https://github.com/X3Cams/VidGrid
